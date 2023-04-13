@@ -1,0 +1,64 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+
+
+def euclidean_distance(x1, x2):
+    return np.sqrt(np.sum((x1 - x2)**2))
+
+
+def most_common(lst):
+    return max(set(lst), key=lst.count)
+
+
+class KNeighborsClassifier:
+    def __init__(self, k=3):
+        self.k = k
+
+    def fit(self, X, y):
+        self.X_train = X
+        self.y_train = y
+
+    def predict(self, X):
+        predicted_labels = [self._predict(x) for x in X]
+        return np.array(predicted_labels)
+
+    def _predict(self, x):
+        # tính toán khoảng cách giữa điểm x và tất cả các điểm trong tập
+        distances = [euclidean_distance(x, x_train)
+                     for x_train in self.X_train]
+
+        # lấy k phần tử gần nhất và lấy nhãn của chúng
+        k_indices = np.argsort(distances)[0:self.k]
+        k_nearest_labels = [self.y_train[i] for i in k_indices]
+
+        # lấy nhãn xuất hiện nhiều nhất trong k phần tử gần nhất
+        most_common_label = most_common(k_nearest_labels)
+        return most_common_label
+
+
+# Tạo dữ liệu mẫu
+X = np.array([[170, 50], [168, 58], [150, 69], [180, 52], [
+             172, 60], [160, 67], [185, 57], [145, 40], [159, 52]])
+y = np.array(['gầy', 'bình thường', 'bình thường', 'gầy',
+             'bình thường', 'bình thường', 'gầy', 'bình thường', 'bình thường'])
+y_train_num = np.where(y == 'gầy', 0, 1)
+
+# Tạo một đối tượng KNN với k=3
+knn = KNeighborsClassifier(k=3)
+
+knn.fit(X, y)
+
+# Dự đoán
+X_test = np.array([[150, 50]])
+y_pred = knn.predict(X_test)
+print(y_pred,  "\n")
+
+# Biểu diễn đồ thị
+plt.figure()
+plt.scatter(X[:, 0], X[:, 1], c=y_train_num)
+plt.scatter(X_test[:, 0], X_test[:, 1], marker='x', c='black', s=50)
+plt.title('KNN k=3')
+plt.xlabel('Chiều cao (cm)')
+plt.ylabel('Cân nặng (kg)')
+plt.show()
