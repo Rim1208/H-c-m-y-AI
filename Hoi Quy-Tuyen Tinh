@@ -1,0 +1,77 @@
+from __future__ import division, print_function,unicode_literals  
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+
+
+
+#hight(cm)
+X= np.array([[147, 150, 153, 158, 163, 165, 168, 170, 173, 175, 178, 180, 183]]).T
+#weight(kg)
+Y= np.array([[ 49, 50, 51,  54, 58, 59, 60, 62, 63, 64, 66, 67, 68]]).T
+
+plt.scatter(X,Y,marker='o')
+plt.show()
+
+#hamdudoan
+def predict(new_radio,weight,bias):
+     return weight*new_radio +bias
+
+#hamchiphi  #hamloi=trung binh cua gia tri thuc- (gia tri du doan)^2
+def cost_funnction(X,Y,weight,bias,rate):
+      n=len(X)
+      sum_error =0
+      for i in range(n):
+        sum_error += (Y[i]-(weight*X[i]+bias))**2
+
+      return sum_error/n
+
+#capnhat 
+def update_weight(X,Y,weight, bias,learning_rate):
+      n=len(X)
+      weight_temp=0.0
+      bias_temp=0.0
+      for i in range(n):
+         weight_temp +=-2*X[i]*(Y[i] -(X[i]*weight +bias ))
+         bias_temp +=-2*(Y[i] -(X[i]*weight +bias ))
+      weight -= (weight_temp/n)*learning_rate
+      bias -=(bias/n)*learning_rate
+
+
+      return weight,bias
+
+#training
+def train(X,Y, weight, bias,learning_rate, iter):
+      cost_his =[]
+      for i in range(iter):
+          weight, bias =update_weight(X,Y,weight, bias,learning_rate)
+          cost =cost_funnction(X,Y,weight, bias,learning_rate)
+          cost_his.append(cost)
+      return weight, bias ,cost_his
+
+
+
+
+weight ,bias , cost =train(X,Y,0.03,0.0015,0.001,30)
+print('Ket Qua')
+print(weight)
+print(bias)
+print(cost)
+print('gia tri du doan :')
+print (predict(15, weight, bias))
+
+solanlap = [i for i in range(30)]
+plt.plot(solanlap, cost)
+plt.show()
+
+
+
+
+
+
+
+
+
+
