@@ -1,0 +1,84 @@
+import numpy as np
+from scipy.spatial.distance import cdist
+import matplotlib.pyplot as plt
+
+
+means = [[2, 2], [9, 2], [4, 9]] # mang
+cov = [[2, 0], [0, 2]]
+n_samples = 500 # khoi tao 500 diem du lieu xung quanh 3 tam cum o tren
+n_cluster = 3 #k=3 
+X0 = np.random.multivariate_normal(means[0], cov, n_samples)
+X1 = np.random.multivariate_normal(means[1], cov, n_samples)
+X2 = np.random.multivariate_normal(means[2], cov, n_samples)# toado se dc lay ngau nhien
+X = np.concatenate((X0, X1, X2), axis = 0)
+plt.xlabel('x')
+plt.ylabel('y')
+plt.plot(X[:, 0], X[:, 1], 'bo', markersize=5)
+plt.plot()
+plt.show()
+
+
+#ham khoi tao tam cum
+def kmeans_init_centers(X, n_cluster):# hamde cac gia tri khong trung lap voi nhau
+  return X[np.random.choice(X.shape[0], n_cluster, replace=False)]
+
+#xac dinh tam cum
+def kmeans_predict_labels(X, centers):
+   D= cdist(X, centers)
+   return np.argmin(D, axis = 1)
+
+#cap nhat vi tri tam cum
+def kmeans_update_centers(X,labels,n_cluster):
+  centers = np.zeros((n_cluster, X.shape[1]))
+  for k in range(n_cluster):
+
+     Xk = X[labels == k, :]
+     
+      
+     centers [k,:] = np.mean(Xk, axis = 0)#tinh trung binh
+  return centers
+#kiem tra tinh hoi tu va tra ve neu 2 bo trung tam giong nhau
+def kmeans_has_converged(centers, new_centers):
+  return (set([tuple(a) for a in centers]) == 
+      set([tuple(a) for a in new_centers]))
+  
+def kmeans_visualize(X, centers, labels, n_cluster, title):
+  plt.xlabel('x') #trucX
+  plt.ylabel('y') #trucY
+  plt.title(title) #title cua do thi
+  plt_colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
+
+
+  
+  for i in range(n_cluster):
+    data = X[labels == i] # lấy dữ liệu của cụm i
+    plt.plot(data[:, 0], data[:, 1], plt_colors[i] + '^', markersize = 4, label = 'cluster_' + str(i)) # Vẽ cụm i lên đồ thị
+    plt.plot(centers[i][0], centers[i][1],  plt_colors[i+4] + 'o', markersize = 10, label = 'center_' + str(i)) # Vẽ tâm cụm i lên đồ thị
+  plt.legend() # Hiện bảng chú thích
+  plt.show()
+#khoi tao toa do cua cac tam cum
+def kmeans(init_centes, init_labels, X, n_cluster):
+  centers = init_centes
+  labels = init_labels
+  times = 0
+  while True:
+    labels = kmeans_predict_labels(X, centers)
+    kmeans_visualize(X, centers, labels, n_cluster, 'Da gan nhan cho du lieu tai thoi diem = ' + str(times + 1))
+    new_centers = kmeans_update_centers(X, labels, n_cluster)
+    if kmeans_has_converged(centers, new_centers):
+      break
+    centers = new_centers
+    kmeans_visualize(X, centers, labels, n_cluster, ' Cap nhat vi tri tam= ' + str(times + 1))
+    times += 1
+  return (centers, labels, times)
+ #khoi tao
+init_centers = kmeans_init_centers(X, n_cluster)
+print(init_centers) # In ra tọa độ khởi tạo ban đầu của các tâm cụm
+init_labels = np.zeros(X.shape[0])
+kmeans_visualize(X, init_centers, init_labels, n_cluster, 'Init centers in the first run. Assigned all data as cluster 0')
+centers, labels, times = kmeans(init_centers, init_labels, X, n_cluster)
+
+print('Done! Kmeans co cac gia tri sau', times, 'Times')
+
+
+   
